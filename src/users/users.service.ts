@@ -42,19 +42,71 @@ export class UsersService {
     return { accessToken };
   }
 
-//   findAll() {
-//     return `This action returns all users`;
-//   }
+  //update logic..
+  async update(userId: number, updateUserDto: UpdateUserDto) {
+    // 1. Find the user by ID
+    let user = await this.userRepo.findOneBy({ id: userId });
+    if (!user) {
+      throw new Error('User not found');
+    }
 
-//   findOne(id: number) {
-//     return `This action returns a #${id} user`;
-//   }
+    // 2. Check if the new phone number is already in use by another user
+    if (updateUserDto.phoneNumber) {
+      const phoneUser = await this.userRepo.findOneBy({
+        phoneNumber: updateUserDto.phoneNumber,
+      });
+      if (phoneUser && phoneUser.id !== userId) {
+        throw new Error('This phone number is already in use');
+      }
+    }
 
-//   update(id: number, updateUserDto: UpdateUserDto) {
-//     return `This action updates a #${id} user`;
-//   }
+    // 3. Check if the new email is already in use by another user
+    if (updateUserDto.userEmail) {
+      const emailUser = await this.userRepo.findOneBy({
+        email: updateUserDto.userEmail,
+      });
+      if (emailUser && emailUser.id !== userId) {
+        throw new Error('This email is already in use');
+      }
+    }
 
-//   remove(id: number) {
-//     return `This action removes a #${id} user`;
-//   }
+    // 4. Update password if provided
+    if (updateUserDto.password) {
+      user.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
+    // 5. Update other fields
+    if (updateUserDto.userName) user.name = updateUserDto.userName;
+    if (updateUserDto.userEmail) user.email = updateUserDto.userEmail;
+    if (updateUserDto.phoneNumber) user.phoneNumber = updateUserDto.phoneNumber;
+    if (updateUserDto.description !== undefined)
+      user.description = updateUserDto.description;
+
+    // 6. Save updated user
+    await this.userRepo.save(user);
+    
+    return {
+      name: user.name,
+      email: user.email,
+      password: user.password,
+      phoneNumber:user.phoneNumber,
+      description:user.description
+    };
+  }
+
+  //   findAll() {
+  //     return `This action returns all users`;
+  //   }
+
+  //   findOne(id: number) {
+  //     return `This action returns a #${id} user`;
+  //   }
+
+  //   update(id: number, updateUserDto: UpdateUserDto) {
+  //     return `This action updates a #${id} user`;
+  //   }
+
+  //   remove(id: number) {
+  //     return `This action removes a #${id} user`;
+  //   }
 }

@@ -17,4 +17,6 @@ export class User {
   phoneNumber: String;
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ONLINE })
   status: UserStatus;
+  @Column()
+  description: String;
 }

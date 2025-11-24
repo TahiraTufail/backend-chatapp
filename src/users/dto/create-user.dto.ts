@@ -2,6 +2,7 @@ import {
   IsEmail,
   IsNotEmpty,
   IsNumber,
+  IsSemVer,
   IsString,
   Length,
   length,
@@ -25,4 +26,7 @@ export class CreateUserDto {
   @IsString()
   @Length(8)
   password: String;
+
+  @IsString()
+  description?: String;
 }
