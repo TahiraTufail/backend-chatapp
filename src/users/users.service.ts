@@ -5,10 +5,12 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UsersService {
   constructor(
+    @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly jwtService: JwtService,
   ) {}
@@ -24,14 +26,14 @@ export class UsersService {
     if (user) {
       throw new Error('This email is already in use');
     }
-    const hashedPassword = bcrypt.hash(createUserDto.password, 10);
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const createdUser = this.userRepo.create({
       name: createUserDto.userName,
       email: createUserDto.userEmail,
       phoneNumber: createUserDto.phoneNumber,
-      password: hashedPassword,
+      password: hashedPassword
     });
-    this.userRepo.save(createdUser);
+    await this.userRepo.save(createdUser);
     //jwt token make
     const payload = {
       id: createdUser.id,
@@ -84,13 +86,13 @@ export class UsersService {
 
     // 6. Save updated user
     await this.userRepo.save(user);
-    
+
     return {
       name: user.name,
       email: user.email,
       password: user.password,
-      phoneNumber:user.phoneNumber,
-      description:user.description
+      phoneNumber: user.phoneNumber,
+      description: user.description,
     };
   }
 

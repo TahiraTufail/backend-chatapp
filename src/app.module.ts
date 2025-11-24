@@ -4,15 +4,26 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './users/entities/user.entity';
+import { UsersService } from './users/users.service';
+import { UsersController } from './users/users.controller';
 
 @Module({
   imports: [
-    UsersModule,
-    ConfigModule.forRoot({
-      isGlobal: true, // makes env available everywhere
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      username: 'postgres',
+      password: 'abcd1234',
+      database: 'chatapp',
+      entities: [User],
+      synchronize: true,
+      port: 1234,
     }),
+    UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService,JwtService],
+  providers: [AppService],
 })
 export class AppModule {}

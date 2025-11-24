@@ -8,15 +8,15 @@ export class User {
   @PrimaryGeneratedColumn()
   id: Number;
   @Column()
-  name: String;
+  name: string;
   @Column()
-  email: String;
+  email: string;
   @Column()
-  password: String;
+  password: string;
   @Column()
   phoneNumber: String;
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ONLINE })
   status: UserStatus;
   @Column()
-  description: String;
+  description: string;
 }
