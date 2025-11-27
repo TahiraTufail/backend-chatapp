@@ -1,11 +1,8 @@
 import {
   IsEmail,
   IsNotEmpty,
-  IsNumber,
-  IsSemVer,
   IsString,
   Length,
-  length,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -20,7 +17,7 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
-  phoneNumber: String;
+  phoneNumber: string;
 
   @IsNotEmpty()
   @IsString()

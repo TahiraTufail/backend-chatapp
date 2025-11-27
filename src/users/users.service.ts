@@ -26,12 +26,13 @@ export class UsersService {
     if (user) {
       throw new Error('This email is already in use');
     }
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const trimmedPassword = createUserDto.password.trim();
+    const hashedPassword = await bcrypt.hash(trimmedPassword, 10);
     const createdUser = this.userRepo.create({
       name: createUserDto.userName,
       email: createUserDto.userEmail,
       phoneNumber: createUserDto.phoneNumber,
-      password: hashedPassword
+      password: hashedPassword,
     });
     await this.userRepo.save(createdUser);
     //jwt token make
@@ -72,9 +73,10 @@ export class UsersService {
       }
     }
 
-    // 4. Update password if provided
+    // 4. Update password if provided (with trimming)
     if (updateUserDto.password) {
-      user.password = await bcrypt.hash(updateUserDto.password, 10);
+      const trimmedPassword = updateUserDto.password.trim();
+      user.password = await bcrypt.hash(trimmedPassword, 10);
     }
 
     // 5. Update other fields
@@ -96,19 +98,58 @@ export class UsersService {
     };
   }
 
-  //   findAll() {
-  //     return `This action returns all users`;
-  //   }
+  //LOGIN FUNCTIONALITY:
+  async login(email: string, password: string) {
+    // 1. Find user by email
+    const user = await this.userRepo.findOneBy({ email });
+    if (!user) {
+      throw new Error('Invalid email');
+    }
 
-  //   findOne(id: number) {
-  //     return `This action returns a #${id} user`;
-  //   }
+    // 2. Compare password with the hashed password in DB
+    const isMatch = await bcrypt.compare(password.trim(), user.password);
+    // console.log('Password input:', password.trim());
+    // console.log('Hashed in DB:', user.password);
+    // console.log('Bcrypt compare result:', isMatch);
+    if (!isMatch) {
+      throw new Error('Invalid password');
+    }
 
-  //   update(id: number, updateUserDto: UpdateUserDto) {
-  //     return `This action updates a #${id} user`;
-  //   }
+    // 3. Generate JWT token
+    const payload = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    };
 
-  //   remove(id: number) {
-  //     return `This action removes a #${id} user`;
-  //   }
+    const accessToken = await this.jwtService.signAsync(payload);
+    console.log('LOGGED IN');
+    return { accessToken };
+  }
+
+  async deleteUserProfile(id: string) {
+    const newId = parseInt(id);
+    const user = await this.userRepo.findOneBy({ id: newId });
+    if (!user) {
+      return { message: 'This user is not available' };
+    }
+    await this.userRepo.remove(user);
+    await this.userRepo.save(user);
+    return { message: 'The user is deleted' };
+  }
+
+  async updateProfileDescription(id: string, description: string) {
+    const newId = parseInt(id);
+    const user = await this.userRepo.findOneBy({ id: newId });
+    if (!user) {
+      return { message: 'The user is not existed' };
+    }
+    user.description = description;
+    await this.userRepo.save(user);
+    return {
+      description: user.description,
+      name: user.name,
+      message: `${name}'s description is now updated`,
+    };
+  }
 }

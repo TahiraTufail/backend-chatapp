@@ -8,6 +8,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
 import { UsersService } from './users/users.service';
 import { UsersController } from './users/users.controller';
+import { ContactsModule } from './contacts/contacts.module';
+import { CustomerController } from './customer/customer.controller';
 
 @Module({
   imports: [
@@ -22,8 +24,9 @@ import { UsersController } from './users/users.controller';
       port: 1234,
     }),
     UsersModule,
+    ContactsModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, CustomerController],
   providers: [AppService],
 })
 export class AppModule {}

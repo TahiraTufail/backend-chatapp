@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Put,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -21,5 +31,19 @@ export class UsersController {
   ) {
     return await this.usersService.update(userId, updateUserDto);
   }
-  
+
+  @Post('login')
+  async authentication(@Body() body: { email: string; password: string }) {
+    return await this.usersService.login(body.email, body.password);
+  }
+
+  @Delete('delete')
+  async deleteUserProfile(@Body() body:{ id: string}){
+    return await this.usersService.deleteUserProfile(body.id);
+  }
+
+  @Patch('descriptionupdate')
+  async descriptionUpdation(@Body() body:{id:string, description:string}){
+    return await this.usersService.updateProfileDescription(body.id, body.description);
+  }
 }
