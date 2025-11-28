@@ -1,5 +1,6 @@
 import { DataSource } from 'typeorm';
 import { User } from './users/entities/user.entity';
+import { Contact } from './contacts/entities/contact.entity';
 export default new DataSource({
   type: 'postgres',
   host: 'localhost',
@@ -9,6 +10,6 @@ export default new DataSource({
   database: 'chatapp',
   synchronize: false,
   logging: true,
-  entities: [User],
+  entities: [User, Contact],
   migrations: ['src/migrations/*.ts'],
 });

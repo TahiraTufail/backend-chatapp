@@ -38,7 +38,7 @@ export class Contact {
   contactUser?: User;
 
   @Column({ type: 'enum', enum: ContactStatus, default: ContactStatus.ACTIVE })
-  status: ContactStatus;
+  status?: ContactStatus;
 
   @CreateDateColumn()
   createdAt: Date;

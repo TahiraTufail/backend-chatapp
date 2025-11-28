@@ -6,10 +6,8 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
-import { UsersService } from './users/users.service';
-import { UsersController } from './users/users.controller';
 import { ContactsModule } from './contacts/contacts.module';
-import { CustomerController } from './customer/customer.controller';
+import { Contact } from './contacts/entities/contact.entity';
 
 @Module({
   imports: [
@@ -19,14 +17,14 @@ import { CustomerController } from './customer/customer.controller';
       username: 'postgres',
       password: 'abcd1234',
       database: 'chatapp',
-      entities: [User],
+      entities: [User, Contact],
       synchronize: true,
       port: 1234,
     }),
     UsersModule,
     ContactsModule,
   ],
-  controllers: [AppController, CustomerController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
