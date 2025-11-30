@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
 
 @Injectable()
 export class UsersService {
@@ -150,6 +151,24 @@ export class UsersService {
       description: user.description,
       name: user.name,
       message: `${name}'s description is now updated`,
+    };
+  }
+  async searchUserByPhone(phoneNumber: string) {
+    const user = await this.userRepo.findOne({
+      where: {
+        phoneNumber: phoneNumber,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException(
+        'No such user with this phone number existed',
+      );
+    }
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
     };
   }
 }

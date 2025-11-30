@@ -22,7 +22,7 @@ export class Contact {
 
   @Column()
   userId: number; // User who added the contact
-
+//bohat saare user aik owner.
   @ManyToOne(() => User, { eager: true })
   @JoinColumn({ name: 'userId' })
   user: User;

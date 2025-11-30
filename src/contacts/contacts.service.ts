@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Contact } from './entities/contact.entity';
 import { CreateContactDto } from './dto/create.contact';
 import { User } from 'src/users/entities/user.entity';
@@ -16,7 +16,7 @@ export class ContactsService {
   //How it is working...createContactdto ayega aur jwt header se userID(jo contact add kar raha ha..like me adding atika so yahan mera header jayega) a
   // ab baki cheezein wohi rahein gi same
 
-  async AddContact(createContact: CreateContactDto, loggedInUser: any) {
+  async addContact(createContact: CreateContactDto, loggedInUser: any) {
     // 1. Cannot add yourself
     if (loggedInUser.phoneNumber === createContact.phoneNumber) {
       console.log('You cannot add yourself as a contact');
@@ -57,20 +57,28 @@ export class ContactsService {
   }
 
   async searchContacts(loggedInUser: any, query: string) {
-    // Make query lowercase for case-insensitive search
-    const searchTerm = query.toLowerCase();
+     const search = `%${query}%`;
 
-    // Search contacts by phoneNumber or name (name from contactUser)
-    const contacts = await this.contactrepo
-      .createQueryBuilder('contact')
-      .leftJoinAndSelect('contact.contactUser', 'contactUser')
-      .where('contact.userId = :userId', { userId: loggedInUser.id })
-      .andWhere(
-        '(LOWER(contact.phoneNumber) LIKE :search OR LOWER(contactUser.name) LIKE :search)',
-        { search: `%${searchTerm}%` },
-      )
-      .getMany();
+     const contacts = await this.contactrepo.find({
+       where: [
+         // 1. Search by phone number (from Contact)ILike query is for case insensitivity 
+         {
+           userId: loggedInUser.id,
+           phoneNumber: ILike(search),
+         },
 
-    return contacts;
+         // 2. Search by name (from related User)
+         {
+           userId: loggedInUser.id,
+           contactUser: {
+             name: ILike(search)
+           },
+         },
+       ],
+       relations: ['contactUser'],
+     });
+
+     return contacts;
   }
+  
 }

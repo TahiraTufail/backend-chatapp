@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
 import { ContactsModule } from './contacts/contacts.module';
 import { Contact } from './contacts/entities/contact.entity';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { Contact } from './contacts/entities/contact.entity';
     }),
     UsersModule,
     ContactsModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

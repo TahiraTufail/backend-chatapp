@@ -18,12 +18,11 @@ export class ContactsController {
   @Post('add')
   @UseGuards(JwtAuthGuard)
   addContact(@Body() dto: CreateContactDto, @Req() req) {
-    return this.contactService.AddContact(dto, req.user);
+    return this.contactService.addContact(dto, req.user);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('search')
-  async search(@Req() req, @Query('q') query: string) {
-    return this.contactService.searchContacts(req.user, query);
+  async search(@Req() req, @Query('q') q: string) {
+    return this.contactService.searchContacts(req.user, q);
   }
 }

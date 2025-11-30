@@ -24,7 +24,7 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard) // ✅ Protect route with JWT
-  @Put('update')
+  @Put('update/:id')
   async update(
     @Param('id') userId: number,
     @Body() updateUserDto: UpdateUserDto,
@@ -32,18 +32,30 @@ export class UsersController {
     return await this.usersService.update(userId, updateUserDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('login')
   async authentication(@Body() body: { email: string; password: string }) {
     return await this.usersService.login(body.email, body.password);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete('delete')
-  async deleteUserProfile(@Body() body:{ id: string}){
+  async deleteUserProfile(@Body() body: { id: string }) {
     return await this.usersService.deleteUserProfile(body.id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch('descriptionupdate')
-  async descriptionUpdation(@Body() body:{id:string, description:string}){
-    return await this.usersService.updateProfileDescription(body.id, body.description);
+  async descriptionUpdation(@Body() body: { id: string; description: string }) {
+    return await this.usersService.updateProfileDescription(
+      body.id,
+      body.description,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('searchbyphone')
+  async searchUser(@Body() body: { phoneNumber: string }) {
+    return await this.usersService.searchUserByPhone(body.phoneNumber);
   }
 }
