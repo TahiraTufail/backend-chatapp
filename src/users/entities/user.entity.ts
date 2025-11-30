@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Contact } from 'src/contacts/entities/contact.entity';
 
 enum UserStatus {
   ONLINE = 'online',
@@ -25,6 +26,14 @@ export class User {
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ONLINE })
   status: UserStatus;
 
-  @Column({ nullable: true }) // ✅ description is now optional
+  @Column({ nullable: true })
   description?: string;
+
+  // 👇 User added these contacts
+  @OneToMany(() => Contact, (contact) => contact.user)
+  contacts: Contact[];
+
+  // 👇 This user appears as someone’s saved contact
+  @OneToMany(() => Contact, (contact) => contact.contactUser)
+  addedAsContact: Contact[];
 }

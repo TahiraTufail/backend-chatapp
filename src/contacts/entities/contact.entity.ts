@@ -1,4 +1,3 @@
-import { User } from 'src/users/entities/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -8,6 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
 
 enum ContactStatus {
   ACTIVE = 'active',
@@ -20,25 +20,24 @@ export class Contact {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  userId: number; // User who added the contact
-//bohat saare user aik owner.
-  @ManyToOne(() => User, { eager: true })
+  // 👇 User who owns this contact list
+  @ManyToOne(() => User, (user) => user.contacts, { eager: true })
   @JoinColumn({ name: 'userId' })
   user: User;
 
   @Column()
-  phoneNumber: string; // Phone number of contact (can be anyone, not in User table)
+  phoneNumber: string;
 
-  @Column({ nullable: true })
-  contactUserId?: number; // If contact exists in User table
-
-  @ManyToOne(() => User, { eager: true, nullable: true })
+  // 👇 Optional: if the saved phoneNumber exists as a User
+  @ManyToOne(() => User, (user) => user.addedAsContact, {
+    eager: true,
+    nullable: true,
+  })
   @JoinColumn({ name: 'contactUserId' })
   contactUser?: User;
 
   @Column({ type: 'enum', enum: ContactStatus, default: ContactStatus.ACTIVE })
-  status?: ContactStatus;
+  status: ContactStatus;
 
   @CreateDateColumn()
   createdAt: Date;
