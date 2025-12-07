@@ -35,7 +35,7 @@ export class ContactsService {
 
     // 3. Check if already saved under this user
     const alreadyExists = await this.contactrepo.findOneBy({
-      userId: loggedInUser.id,
+      user: { id: loggedInUser.id },
       phoneNumber: createContact.phoneNumber,
     });
 
@@ -47,9 +47,9 @@ export class ContactsService {
 
     // 4. Create contact entry
     const newContact = this.contactrepo.create({
-      userId: loggedInUser.id, // owner
+      user: { id: loggedInUser.id },
       phoneNumber: createContact.phoneNumber,
-      contactUserId: contactUser.id,
+      contactUser: { id: contactUser.id },
     });
 
     // 5. Save to DB
@@ -57,28 +57,41 @@ export class ContactsService {
   }
 
   async searchContacts(loggedInUser: any, query: string) {
-     const search = `%${query}%`;
+    const search = `%${query}%`;
 
-     const contacts = await this.contactrepo.find({
-       where: [
-         // 1. Search by phone number (from Contact)ILike query is for case insensitivity 
-         {
-           userId: loggedInUser.id,
-           phoneNumber: ILike(search),
-         },
+    const contacts = await this.contactrepo.find({
+      where: [
+        // 1. Search by phone number (from Contact)ILike query is for case insensitivity
+        {
+          user: { id: loggedInUser.id },
+          phoneNumber: ILike(search),
+        },
 
-         // 2. Search by name (from related User)
-         {
-           userId: loggedInUser.id,
-           contactUser: {
-             name: ILike(search)
-           },
-         },
-       ],
-       relations: ['contactUser'],
-     });
+        // 2. Search by name (from related User)
+        {
+          user: { id: loggedInUser.id },
+          contactUser: {
+            name: ILike(search),
+          },
+        },
+      ],
+      relations: ['contactUser'],
+    });
 
-     return contacts;
+    return contacts;
   }
-  
+
+  async getAllContacts(loggedInUser: any) {
+    const contacts = await this.contactrepo.find({
+      where: {
+        user: { id: loggedInUser.id },
+      },
+      relations: ['contactUser'],
+      order: {
+        createdAt: 'DESC', // Optional: order by most recently added
+      },
+    });
+
+    return contacts;
+  }
 }

@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Put,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -32,7 +33,6 @@ export class UsersController {
     return await this.usersService.update(userId, updateUserDto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('login')
   async authentication(@Body() body: { email: string; password: string }) {
     return await this.usersService.login(body.email, body.password);
@@ -55,7 +55,8 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('searchbyphone')
-  async searchUser(@Body() body: { phoneNumber: string }) {
-    return await this.usersService.searchUserByPhone(body.phoneNumber);
+  async searchUser(@Query('phoneNumber') phoneNumber: string) {
+    console.log('in controler');
+    return await this.usersService.searchUserByPhone(phoneNumber);
   }
 }

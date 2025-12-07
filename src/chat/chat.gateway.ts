@@ -7,7 +7,6 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { error } from 'node:console';
 import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway(8080, {
@@ -46,9 +45,13 @@ export class ChatGateway
     client.data.name = payload.name;
     client.data.phoneNumber = payload.phoneNumber;
     client.data.email = payload.email;
+
+    client.emit('connected', {
+      connected: true,
+    });
   }
 
   async handleDisconnect(client: Socket) {
-    console.log("CLIENT DISCONNECTED");
+    console.log('CLIENT DISCONNECTED');
   }
 }

@@ -125,7 +125,7 @@ export class UsersService {
 
     const accessToken = await this.jwtService.signAsync(payload);
     console.log('LOGGED IN');
-    return { accessToken };
+    return { access_token: accessToken };
   }
 
   async deleteUserProfile(id: string) {
@@ -160,6 +160,7 @@ export class UsersService {
       },
     });
     if (!user) {
+      console.log('No such user with this phone number existed');
       throw new NotFoundException(
         'No such user with this phone number existed',
       );

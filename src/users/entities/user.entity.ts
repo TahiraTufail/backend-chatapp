@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Contact } from 'src/contacts/entities/contact.entity';
+import { Message } from 'src/chat/entities/message.entity';
 
 enum UserStatus {
   ONLINE = 'online',
@@ -36,4 +37,10 @@ export class User {
   // 👇 This user appears as someone’s saved contact
   @OneToMany(() => Contact, (contact) => contact.contactUser)
   addedAsContact: Contact[];
+
+  @OneToMany(() => Message, (message) => message.sender)
+  sentMessages: Message[];
+
+  @OneToMany(() => Message, (message) => message.recipient)
+  receivedMessages: Message[];
 }

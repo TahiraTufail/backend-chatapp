@@ -14,20 +14,14 @@ export class ChatRoom {
   @PrimaryColumn()
   id: string;
 
-  @Column()
-  firstUserId: string;
-
   @OneToOne(() => User, { eager: true })
   @JoinColumn({ name: 'firstUserId' })
   firstUser: User;
-
-  @Column()
-  secondUserId: string;
 
   @OneToOne(() => User, { eager: true })
   @JoinColumn({ name: 'secondUserId' })
   secondUser: User;
 
   @OneToMany(() => Message, (message) => message.chatRoom)
-  messages: Message;
+  messages: Message[];
 }
