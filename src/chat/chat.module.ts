@@ -7,10 +7,12 @@ import { Contact } from 'src/contacts/entities/contact.entity';
 import { User } from 'src/users/entities/user.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { ChatRoom } from './entities/chatroom.entity';
+import { Message } from './entities/message.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Contact, User]),
+    TypeOrmModule.forFeature([Contact, User, ChatRoom,Message]),
     PassportModule,
     JwtModule.register({
       secret: 'your_secret_key',

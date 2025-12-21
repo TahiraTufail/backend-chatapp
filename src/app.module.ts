@@ -9,6 +9,8 @@ import { User } from './users/entities/user.entity';
 import { ContactsModule } from './contacts/contacts.module';
 import { Contact } from './contacts/entities/contact.entity';
 import { ChatModule } from './chat/chat.module';
+import { Message } from './chat/entities/message.entity';
+import { ChatRoom } from './chat/entities/chatroom.entity';
 
 @Module({
   imports: [
@@ -18,7 +20,7 @@ import { ChatModule } from './chat/chat.module';
       username: 'postgres',
       password: 'abcd1234',
       database: 'chatapp',
-      entities: [User, Contact],
+      entities: [User, Contact, Message, ChatRoom],
       synchronize: true,
       port: 1234,
     }),

@@ -1,17 +1,20 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { PrimaryGeneratedColumn } from 'typeorm';
 import { ChatRoom } from './chatroom.entity';
 import { User } from 'src/users/entities/user.entity';
 
 @Entity()
 export class Message {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn()
+  id: string;
+
+  @Column()
+  content: string;
 
   @ManyToOne(() => ChatRoom, (chatRoom) => chatRoom.messages)
   chatRoom: ChatRoom;
 
-  @ManyToOne(() => User, (user) => user.sentMessages)
+  @ManyToOne(() => User, (user) => user.sentMessages, { eager: true })
   sender: User;
 
   @ManyToOne(() => User, (user) => user.receivedMessages)
@@ -21,6 +24,5 @@ export class Message {
   order: number;
 
   @Column()
-  createdAt:Date;
-  
+  createdAt: Date;
 }

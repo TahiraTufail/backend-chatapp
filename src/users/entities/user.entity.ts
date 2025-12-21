@@ -6,7 +6,6 @@ enum UserStatus {
   ONLINE = 'online',
   OFFLINE = 'offline',
 }
-
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -28,7 +27,7 @@ export class User {
   status: UserStatus;
 
   @Column({ nullable: true })
-  description?: string;
+  description?: string;7
 
   // 👇 User added these contacts
   @OneToMany(() => Contact, (contact) => contact.user)

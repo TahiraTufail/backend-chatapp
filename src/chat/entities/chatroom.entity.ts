@@ -3,6 +3,7 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryColumn,
@@ -12,16 +13,16 @@ import { Message } from './message.entity';
 @Entity()
 export class ChatRoom {
   @PrimaryColumn()
-  id: string;
+  id: number;
 
-  @OneToOne(() => User, { eager: true })
+  @ManyToOne(() => User, { eager: true })
   @JoinColumn({ name: 'firstUserId' })
   firstUser: User;
 
-  @OneToOne(() => User, { eager: true })
+  @ManyToOne(() => User, { eager: true })
   @JoinColumn({ name: 'secondUserId' })
   secondUser: User;
 
-  @OneToMany(() => Message, (message) => message.chatRoom)
+  @OneToMany(() => Message, (message) => message.chatRoom, { eager: true })
   messages: Message[];
 }

@@ -1,19 +1,29 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
+import { Contact } from 'src/contacts/entities/contact.entity';
+import { Message } from 'src/chat/entities/message.entity';
+import { ChatRoom } from 'src/chat/entities/chatroom.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
     private readonly jwtService: JwtService,
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
+    @InjectRepository(Contact)
+    private contactRepo: Repository<Contact>,
+    @InjectRepository(Message)
+    private messageRepo: Repository<Message>,
+    private dataSource: DataSource,
+    @InjectRepository(ChatRoom)
+    private chatRoomRepo: Repository<ChatRoom>,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -43,7 +53,7 @@ export class UsersService {
       email: createdUser.email,
     };
     const accessToken = await this.jwtService.signAsync(payload);
-    return { accessToken };
+    return { accessToken, userId: createdUser.id };
   }
 
   //update logic..
@@ -125,18 +135,71 @@ export class UsersService {
 
     const accessToken = await this.jwtService.signAsync(payload);
     console.log('LOGGED IN');
-    return { access_token: accessToken };
+    return { access_token: accessToken, userId: user.id };
   }
 
-  async deleteUserProfile(id: string) {
-    const newId = parseInt(id);
-    const user = await this.userRepo.findOneBy({ id: newId });
+  async deleteUserProfile(id: number) {
+    const user = await this.userRepo.findOneBy({ id: id });
     if (!user) {
       return { message: 'This user is not available' };
     }
-    await this.userRepo.remove(user);
-    await this.userRepo.save(user);
-    return { message: 'The user is deleted' };
+
+    // Use a transaction to ensure all deletions happen together
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 1. Find all chat rooms where this user is a participant
+      const chatRooms = await queryRunner.manager
+        .createQueryBuilder(ChatRoom, 'chatRoom')
+        .where('chatRoom.firstUserId = :userId', { userId: id })
+        .orWhere('chatRoom.secondUserId = :userId', { userId: id })
+        .getMany();
+
+      // 2. Delete all messages in those chat rooms
+      for (const room of chatRooms) {
+        await queryRunner.manager.delete(Message, {
+          chatRoom: { id: room.id },
+        });
+      }
+
+      // 3. Delete all chat rooms where this user is a participant
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from(ChatRoom)
+        .where('firstUserId = :userId', { userId: id })
+        .orWhere('secondUserId = :userId', { userId: id })
+        .execute();
+
+      // 4. Delete all contacts where this user is the owner
+      await queryRunner.manager.delete(Contact, { user: { id } });
+
+      // 5. Delete all contacts where this user is saved as a contact
+      await queryRunner.manager.delete(Contact, { contactUser: { id } });
+
+      // 6. Delete any remaining messages sent by this user
+      await queryRunner.manager.delete(Message, { sender: { id } });
+
+      // 7. Delete any remaining messages received by this user
+      await queryRunner.manager.delete(Message, { recipient: { id } });
+
+      // 8. Finally, delete the user
+      await queryRunner.manager.delete(User, { id });
+
+      // Commit the transaction
+      await queryRunner.commitTransaction();
+
+      return { message: 'The user is deleted' };
+    } catch (error) {
+      // Rollback the transaction if anything fails
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      // Release the query runner
+      await queryRunner.release();
+    }
   }
 
   async updateProfileDescription(id: string, description: string) {

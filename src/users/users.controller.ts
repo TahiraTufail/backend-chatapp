@@ -39,9 +39,9 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete('delete')
-  async deleteUserProfile(@Body() body: { id: string }) {
-    return await this.usersService.deleteUserProfile(body.id);
+  @Delete('delete/:id')
+  async deleteUserProfile(@Param('id') userId: number) {
+    return await this.usersService.deleteUserProfile(userId);
   }
 
   @UseGuards(JwtAuthGuard)

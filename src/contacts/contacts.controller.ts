@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
   Post,
   Query,
   Req,
@@ -29,4 +31,14 @@ export class ContactsController {
   async getAll(@Req() req: any) {
     return this.contactService.getAllContacts(req.user);
   }
+
+  @Delete('deleteContact/:id')
+  async deleteContact(
+    @Param('id') contactId: number,
+    @Req() req: any, // or however you get the logged-in user
+  ) {
+    return this.contactService.deleteContact(contactId, req.user);
+  }
 }
+
+
